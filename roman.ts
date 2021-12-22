@@ -14,13 +14,14 @@ const ROMAN_LETTERS = [
     [1, 'I'],
 ];
 
-const LETTER_INDEXES = ROMAN_LETTERS.map(x => x[1]).reduce((memo, curr, index) => {
+const LETTER_ORDINAL = ROMAN_LETTERS.map(x => x[1]).reduce((memo, curr, index) => {
     memo[curr] = index;
     return memo;
 }, {});
 
 export function digitalToRoman(digital: number) {
     let result = '';
+
     ROMAN_LETTERS.forEach(([base, letter]) => {
         while (digital >= base) {
             result += letter;
@@ -33,16 +34,28 @@ export function digitalToRoman(digital: number) {
 
 export function romanToDigital(roman: string) {
     let result = 0;
-    for (let i = 0; i < roman.length; i++) {
-        const currentIndex = LETTER_INDEXES[roman[i]];
-        const nextIndex = i === roman.length - 1 ? ROMAN_LETTERS.length : LETTER_INDEXES[roman[i+1]];
-        let num = ROMAN_LETTERS[currentIndex][0] as number;
-        if (currentIndex > nextIndex) {
+
+    for (let i = 0; i < roman.length - 1; i++) {
+        let num = getDigitalFromRomanChar(roman[i]);
+
+        let positive = isPositiveRomanChar(roman[i], roman[i + 1]);
+        if (!positive) {
             num = 0 - num;
         }
 
         result += num;
     }
 
+    result += getDigitalFromRomanChar(roman[roman.length - 1]);
+
     return result;
+}
+
+function getDigitalFromRomanChar(romanChar: string) {
+    const index = LETTER_ORDINAL[romanChar];
+    return ROMAN_LETTERS[index][0] as number;
+}
+
+function isPositiveRomanChar(currentChar: string, nextChar: string) {
+    return LETTER_ORDINAL[currentChar] <= LETTER_ORDINAL[nextChar];
 }
